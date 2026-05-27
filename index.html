@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Band Instrument Points</title>
+
   <style>
     :root{
       --bg:#f5f7fb;
@@ -26,11 +27,17 @@
       font-family:Arial, Helvetica, sans-serif;
       background:var(--bg);
       color:var(--text);
+
+      /* ✅ FULL CENTERING */
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
 
     .wrap{
+      width:100%;
       max-width:1100px;
-      margin:0 auto;
       padding:14px;
     }
 
@@ -226,6 +233,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="grid" id="grid"></div>
@@ -316,10 +324,6 @@
       return state.selectedPeriod;
     }
 
-    function isHiddenForCurrentPeriod(key){
-      return hiddenByPeriod[currentPeriod()].includes(key);
-    }
-
     function getScore(period, key){
       return Number(state.scores[period][key] || 0);
     }
@@ -398,7 +402,7 @@
       instrumentLayout.forEach(item => {
         if(item.key === "TOTAL"){
           html += renderTotalBox();
-        } else if(isHiddenForCurrentPeriod(item.key)) {
+        } else if(hiddenByPeriod[currentPeriod()].includes(item.key)) {
           html += renderEmptyBox(`Not used in Period ${currentPeriod()}`);
         } else {
           html += renderInstrumentBox(item);
