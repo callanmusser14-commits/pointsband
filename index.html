@@ -4,9 +4,433 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Band Instrument Points</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --line:#dde5ee;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --shadow:0 8px 22px rgba(15,23,42,0.08);
+      --radius:16px;
+      --gap:12px;
+      --panel:#f8fbff;
+      --panel2:#f2f6fb;
+      --accent:#eaf2ff;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:var(--gap);
+      margin-bottom:14px;
+    }
+
+    .bottomBar{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:var(--gap);
+      align-items:stretch;
+    }
+
+    .controlBox,
+    .box{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .box{
+      min-height:132px;
+    }
+
+    .totalBox{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:14px;
+      background:linear-gradient(to bottom, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .totalLabel{
+      font-size:13px;
+      font-weight:700;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.7px;
+      margin-bottom:8px;
+    }
+
+    .totalValue{
+      font-size:42px;
+      font-weight:800;
+      line-height:1;
+      margin-bottom:8px;
+    }
+
+    .totalCompare{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .instrumentCard{
+      display:grid;
+      grid-template-columns: 78% 22%;
+      height:132px;
+    }
+
+    .instrumentMain{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:10px 8px;
+      background:linear-gradient(to bottom, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .abbrBubble{
+      width:58px;
+      height:58px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      font-weight:800;
+      margin-bottom:10px;
+      border:1px solid rgba(0,0,0,0.06);
+      letter-spacing:.2px;
+    }
+
+    .name{
+      font-size:15px;
+      font-weight:700;
+      line-height:1.15;
+      margin-bottom:6px;
+      max-width:100%;
+      word-break:break-word;
+    }
+
+    .score{
+      font-size:30px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .instrumentControls{
+      display:grid;
+      grid-template-rows: 1fr 1fr;
+      border-left:1px solid var(--line);
+      background:#f9fbfe;
+    }
+
+    .controlHalf{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      transition:background .12s ease, transform .08s ease;
+      font-size:28px;
+      font-weight:800;
+      color:var(--muted);
+    }
+
+    .controlHalf.top{
+      border-bottom:1px solid var(--line);
+      background:var(--panel);
+    }
+
+    .controlHalf.bottom{
+      background:var(--panel2);
+    }
+
+    .controlHalf:active{
+      background:var(--accent);
+      transform:scale(.98);
+    }
+
+    .emptyBox{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:14px;
+      color:var(--muted);
+      font-size:14px;
+      font-weight:700;
+      background:linear-gradient(to bottom, #ffffff 0%, #fafcff 100%);
+    }
+
+    .controlBox{
+      min-height:82px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      transition:transform .08s ease, background .12s ease;
+      text-align:center;
+      padding:10px;
+    }
+
+    .controlBox:active{
+      transform:scale(.985);
+    }
+
+    .controlLabel{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.6px;
+      margin-bottom:6px;
+    }
+
+    .controlValue{
+      font-size:26px;
+      font-weight:800;
+      line-height:1.1;
+    }
+
+    @media (max-width:900px){
+      .grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width:680px){
+      .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+      .bottomBar{ grid-template-columns:1fr; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Your Band Instrument Points app goes here</h1>
-  <p>Paste your full HTML code into this file if needed.</p>
+  <div class="wrap">
+    <div class="grid" id="grid"></div>
+
+    <div class="bottomBar">
+      <div class="controlBox" id="periodToggle" title="Switch periods">
+        <div class="controlLabel">Viewing</div>
+        <div class="controlValue" id="periodValue">Period 8</div>
+      </div>
+
+      <div class="controlBox" id="resetButton" title="Reset current period">
+        <div class="controlLabel">Reset</div>
+        <div class="controlValue">Clear Scores</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "mband_instrument_points_v5";
+
+    const instrumentLayout = [
+      { key: "TOTAL", label: "Total Points" },
+
+      { key: "flute",      label: "Flute",          abbr: "Fl", color: "#dbeafe", text: "#1d4ed8" },
+      { key: "oboe",       label: "Oboe",           abbr: "Ob", color: "#fce7f3", text: "#be185d" },
+      { key: "clarinet",   label: "Clarinet",       abbr: "Cl", color: "#ede9fe", text: "#6d28d9" },
+      { key: "altoSax",    label: "Alto Saxophone", abbr: "AS", color: "#fef3c7", text: "#b45309" },
+
+      { key: "lowReeds",   label: "Low Reeds",      abbr: "LR", color: "#dcfce7", text: "#15803d" },
+      { key: "horn",       label: "Horn",           abbr: "Hr", color: "#ffe4e6", text: "#be123c" },
+      { key: "trumpet",    label: "Trumpet",        abbr: "Tp", color: "#d1fae5", text: "#047857" },
+      { key: "trombone",   label: "Trombone",       abbr: "Tb", color: "#e0f2fe", text: "#0369a1" },
+
+      { key: "baritone",   label: "Baritone",       abbr: "Ba", color: "#f3e8ff", text: "#7e22ce" },
+      { key: "tuba",       label: "Tuba",           abbr: "Tu", color: "#fee2e2", text: "#b91c1c" },
+      { key: "percussion", label: "Percussion",     abbr: "Pc", color: "#ecfccb", text: "#4d7c0f" }
+    ];
+
+    const hiddenByPeriod = {
+      8: ["horn"],
+      9: ["oboe"]
+    };
+
+    const defaultScores = {
+      8: {
+        flute:0, oboe:0, clarinet:0, altoSax:0, lowReeds:0,
+        horn:0, trumpet:0, trombone:0, baritone:0, tuba:0, percussion:0
+      },
+      9: {
+        flute:0, oboe:0, clarinet:0, altoSax:0, lowReeds:0,
+        horn:0, trumpet:0, trombone:0, baritone:0, tuba:0, percussion:0
+      }
+    };
+
+    const defaults = {
+      selectedPeriod: 8,
+      scores: defaultScores
+    };
+
+    let state = loadState();
+
+    function deepCopy(obj){
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function loadState(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if(!saved) return deepCopy(defaults);
+
+        return {
+          selectedPeriod: saved.selectedPeriod || 8,
+          scores: {
+            8: { ...defaultScores[8], ...(saved.scores?.[8] || {}) },
+            9: { ...defaultScores[9], ...(saved.scores?.[9] || {}) }
+          }
+        };
+      } catch(e){
+        return deepCopy(defaults);
+      }
+    }
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function currentPeriod(){
+      return state.selectedPeriod;
+    }
+
+    function isHiddenForCurrentPeriod(key){
+      return hiddenByPeriod[currentPeriod()].includes(key);
+    }
+
+    function getScore(period, key){
+      return Number(state.scores[period][key] || 0);
+    }
+
+    function setScore(period, key, value){
+      state.scores[period][key] = value;
+      saveState();
+    }
+
+    function adjustScore(key, amount){
+      const period = currentPeriod();
+      const current = getScore(period, key);
+      setScore(period, key, current + amount);
+      render();
+    }
+
+    function visibleKeysForPeriod(period){
+      return instrumentLayout
+        .filter(item => item.key !== "TOTAL")
+        .filter(item => !hiddenByPeriod[period].includes(item.key))
+        .map(item => item.key);
+    }
+
+    function getTotal(period){
+      return visibleKeysForPeriod(period).reduce((sum, key) => sum + getScore(period, key), 0);
+    }
+
+    function renderTotalBox(){
+      const p8 = getTotal(8);
+      const p9 = getTotal(9);
+      const current = currentPeriod();
+
+      return `
+        <div class="box totalBox">
+          <div class="totalLabel">Total Points</div>
+          <div class="totalValue">${getTotal(current)}</div>
+          <div class="totalCompare">
+            Period 8: <strong>${p8}</strong><br>
+            Period 9: <strong>${p9}</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInstrumentBox(item){
+      const score = getScore(currentPeriod(), item.key);
+
+      return `
+        <div class="box instrumentCard">
+          <div class="instrumentMain">
+            <div class="abbrBubble" style="background:${item.color}; color:${item.text};">
+              ${item.abbr}
+            </div>
+            <div class="name">${item.label}</div>
+            <div class="score">${score}</div>
+          </div>
+
+          <div class="instrumentControls">
+            <div class="controlHalf top" onclick="handleAdjust('${item.key}', 1)">+</div>
+            <div class="controlHalf bottom" onclick="handleAdjust('${item.key}', -1)">−</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEmptyBox(text){
+      return `<div class="box emptyBox">${text}</div>`;
+    }
+
+    function render(){
+      document.getElementById("periodValue").textContent = `Period ${currentPeriod()}`;
+
+      const grid = document.getElementById("grid");
+      let html = "";
+
+      instrumentLayout.forEach(item => {
+        if(item.key === "TOTAL"){
+          html += renderTotalBox();
+        } else if(isHiddenForCurrentPeriod(item.key)) {
+          html += renderEmptyBox(`Not used in Period ${currentPeriod()}`);
+        } else {
+          html += renderInstrumentBox(item);
+        }
+      });
+
+      grid.innerHTML = html;
+    }
+
+    window.handleAdjust = function(key, amount){
+      adjustScore(key, amount);
+    };
+
+    document.getElementById("periodToggle").addEventListener("click", () => {
+      state.selectedPeriod = state.selectedPeriod === 8 ? 9 : 8;
+      saveState();
+      render();
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      const confirmed = confirm(`Do you confirm resetting all scores for Period ${currentPeriod()}?`);
+      if(!confirmed) return;
+
+      Object.keys(state.scores[currentPeriod()]).forEach(key => {
+        state.scores[currentPeriod()][key] = 0;
+      });
+
+      saveState();
+      render();
+    });
+
+    render();
+  </script>
 </body>
 </html>
